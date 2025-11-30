@@ -15,7 +15,7 @@ import (
 
 	"github.com/github/git-sizer/git"
 	"github.com/github/git-sizer/internal/refopts"
-	"github.com/github/git-sizerisatty"
+	"github.com/github/git-sizer/isatty"
 	"github.com/github/git-sizer/meter"
 	"github.com/github/git-sizer/sizes"
 )
@@ -259,8 +259,7 @@ func mainImplementation(ctx context.Context, stdout, stderr io.Writer, args []st
 			if !(jsonVersion == 1 || jsonVersion == 2) {
 				return fmt.Errorf("JSON version (read from gitconfig) must be 1 or 2")
 			}
-		}
-		else if !(jsonVersion == 1 || jsonVersion == 2) {
+		} else if !(jsonVersion == 1 || jsonVersion == 2) {
 			return fmt.Errorf("JSON version must be 1 or 2")
 		}
 	}
