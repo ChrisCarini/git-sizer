@@ -273,6 +273,7 @@ func (i *indentedItem) EmitMarkdown(t *markdownTable) {
 type Threshold float64
 
 // Methods to implement pflag.Value:
+
 func (t *Threshold) String() string {
 	if t == nil {
 		return "UNSET"
@@ -712,7 +713,6 @@ func (s *HistorySize) contents(refGroups []RefGroup) tableContents {
 			I("maxCheckoutSubmoduleCount", "Number of submodules",
 				"The maximum number of submodules in any checkout",
 				s.MaxExpandedSubmoduleCountTree, s.MaxExpandedSubmoduleCount, metric, "", 100),
-			),
-		)
+		),
 	)
 }
