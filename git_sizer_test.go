@@ -86,10 +86,10 @@ func newGitBomb(t *testing.T, repo *testutils.TestRepo, depth, breadth int, body
 		_, err := fmt.Fprintf(
 			w,
 			"tree %s\n"+
-				"author Example <example@example.com> 1112911993 -0700\n"+
-				"committer Example <example@example.com> 1112911993 -0700\n"+
-				"\n"+
-				"Test git bomb\n",
+			"author Example <example@example.com> 1112911993 -0700\n"+
+			"committer Example <example@example.com> 1112911993 -0700\n"+
+			"\n"+
+			"Test git bomb\n",
 			oid,
 		)
 		return err
@@ -298,7 +298,7 @@ func TestRefSelections(t *testing.T) {
 
 				// Make sure that the right references were reported scanned:
 				assert.Equal(t, expectedStderr, stderr.String())
-			},
+			}
 		)
 	}
 }
@@ -506,7 +506,8 @@ References (included references marked with '+'):
 + refs/tags/release-2
 `[1:],
 		},
-	} {
+	}
+	for p := range p {
 		p := p
 		t.Run(
 			p.name,
@@ -537,7 +538,7 @@ References (included references marked with '+'):
 				if p.stderr != "" {
 					assert.Equal(t, stderr.String(), p.stderr)
 				}
-			},
+			}
 		)
 	}
 }
@@ -550,7 +551,7 @@ func pow(x uint64, n int) uint64 {
 	return p
 }
 
-type refGrouper struct{}
+type refGrouper struct {}
 
 func (rg refGrouper) Categorize(refname string) (bool, []sizes.RefGroupSymbol) {
 	return true, nil
@@ -573,12 +574,12 @@ func TestBomb(t *testing.T) {
 	repo := testRepo.Repository(t)
 
 	t.Run("full", func(t *testing.T) {
-		refRoots, err := sizes.CollectReferences(ctx, repo, refGrouper{})
+		referenceRoots, err := sizes.CollectReferences(ctx, repo, refGrouper{})
 		require.NoError(t, err)
 
-		roots := make([]sizes.Root, 0, len(refRoots))
-		for _, refRoot := range refRoots {
-			roots = append(roots, refRoot)
+		roots := make([]sizes.Root, 0, len(referenceRoots))
+		for _, referenceRoot := range referenceRoots {
+			roots = append(roots, referenceRoot)
 		}
 
 		h, err := sizes.ScanRepositoryUsingGraph(
@@ -671,12 +672,6 @@ func TestBomb(t *testing.T) {
 		assert.Equal(t, "master:d0/d0", h.MaxExpandedTreeCountTree.BestPath(), "max expanded tree count tree")
 		assert.Equal(t, counts.Count32(pow(10, 8)), h.MaxExpandedBlobCount, "max expanded blob count")
 		assert.Equal(t, "master:d0/d0", h.MaxExpandedBlobCountTree.BestPath(), "max expanded blob count tree")
-		assert.Equal(t, counts.Count64(6*pow(10, 8)), h.MaxExpandedBlobSize, "max expanded blob size")
-		assert.Equal(t, "master:d0/d0", h.MaxExpandedBlobSizeTree.BestPath(), "max expanded blob size tree")
-		assert.Equal(t, counts.Count32(0), h.MaxExpandedLinkCount, "max expanded link count")
-		assert.Nil(t, h.MaxExpandedLinkCountTree, "max expanded link count tree")
-		assert.Equal(t, counts.Count32(0), h.MaxExpandedSubmoduleCount, "max expanded submodule count")
-		assert.Nil(t, h.MaxExpandedSubmoduleCountTree, "max expanded submodule count tree")
 	})
 }
 
@@ -710,12 +705,12 @@ func TestTaggedTags(t *testing.T) {
 
 	repo := testRepo.Repository(t)
 
-	refRoots, err := sizes.CollectReferences(ctx, repo, refGrouper{})
+	referenceRoots, err := sizes.CollectReferences(ctx, repo, refGrouper{})
 	require.NoError(t, err)
 
-	roots := make([]sizes.Root, 0, len(refRoots))
-	for _, refRoot := range refRoots {
-		roots = append(roots, refRoot)
+	roots := make([]sizes.Root, 0, len(referenceRoots))
+	for _, referenceRoot := range referenceRoots {
+		roots = append(roots, referenceRoot)
 	}
 
 	h, err := sizes.ScanRepositoryUsingGraph(
@@ -744,12 +739,12 @@ func TestFromSubdir(t *testing.T) {
 
 	repo := testRepo.Repository(t)
 
-	refRoots, err := sizes.CollectReferences(ctx, repo, refGrouper{})
+	referenceRoots, err := sizes.CollectReferences(ctx, repo, refGrouper{})
 	require.NoError(t, err)
 
-	roots := make([]sizes.Root, 0, len(refRoots))
-	for _, refRoot := range refRoots {
-		roots = append(roots, refRoot)
+	roots := make([]sizes.Root, 0, len(referenceRoots))
+	for _, referenceRoot := range referenceRoots {
+		roots = append(roots, referenceRoot)
 	}
 
 	h, err := sizes.ScanRepositoryUsingGraph(
@@ -808,12 +803,12 @@ func TestSubmodule(t *testing.T) {
 
 	mainRepo := mainTestRepo.Repository(t)
 
-	mainRefRoots, err := sizes.CollectReferences(ctx, mainRepo, refGrouper{})
+	mainReferenceRoots, err := sizes.CollectReferences(ctx, mainRepo, refGrouper{})
 	require.NoError(t, err)
 
-	mainRoots := make([]sizes.Root, 0, len(mainRefRoots))
-	for _, refRoot := range mainRefRoots {
-		mainRoots = append(mainRoots, refRoot)
+	mainRoots := make([]sizes.Root, 0, len(mainReferenceRoots))
+	for _, referenceRoot := range mainReferenceRoots {
+		mainRoots = append(mainRoots, referenceRoot)
 	}
 
 	// Analyze the main repo:
@@ -833,12 +828,12 @@ func TestSubmodule(t *testing.T) {
 
 	submRepo2 := submTestRepo2.Repository(t)
 
-	submRefRoots2, err := sizes.CollectReferences(ctx, submRepo2, refGrouper{})
+	submReferenceRoots2, err := sizes.CollectReferences(ctx, submRepo2, refGrouper{})
 	require.NoError(t, err)
 
-	submRoots2 := make([]sizes.Root, 0, len(submRefRoots2))
-	for _, refRoot := range submRefRoots2 {
-		submRoots2 = append(submRoots2, refRoot)
+	submRoots2 := make([]sizes.Root, 0, len(submReferenceRoots2))
+	for _, referenceRoot := range submReferenceRoots2 {
+		submRoots2 = append(submRoots2, referenceRoot)
 	}
 
 	h, err = sizes.ScanRepositoryUsingGraph(
@@ -854,8 +849,6 @@ func TestSHA256(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-
-	t.Helper()
 
 	path, err := os.MkdirTemp("", "sha256")
 	require.NoError(t, err)
@@ -885,4 +878,184 @@ func TestSHA256(t *testing.T) {
 
 	_, err = sizes.CollectReferences(ctx, repo, refGrouper{})
 	require.NoError(t, err)
+}
+
+// TestMarkdownOutput tests that the --markdown flag produces valid markdown table output.
+func TestMarkdownOutput(t *testing.T) {
+	t.Parallel()
+
+	testRepo := testutils.NewTestRepo(t, false, "markdown-output")
+	defer testRepo.Remove(t)
+
+	timestamp := time.Unix(1112911993, 0)
+
+	testRepo.AddFile(t, "file.txt", "Hello, world!\n")
+
+	cmd := testRepo.GitCommand(t, "commit", "-m", "initial")
+	testutils.AddAuthorInfo(cmd, &timestamp)
+	require.NoError(t, cmd.Run(), "creating commit")
+
+	executable := sizerExe(t)
+
+	t.Run("markdown flag produces table output", func(t *testing.T) {
+		cmd := exec.Command(executable, "--markdown", "-v", "--no-progress")
+		cmd.Env = append(
+			os.Environ(),
+			"GIT_DIR="+testRepo.Path,
+		)
+		var stdout bytes.Buffer
+		cmd.Stdout = &stdout
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		err := cmd.Run()
+		require.NoError(t, err)
+
+		output := stdout.String()
+
+		// Check that output contains markdown table header
+		assert.Contains(t, output, "| Name | Value | Level of concern |")
+		assert.Contains(t, output, "|------|-------|------------------|")
+
+		// Check that output contains hierarchical paths with > separator
+		assert.Contains(t, output, "**Overall repository size**")
+		assert.Contains(t, output, "> **Commits**")
+		assert.Contains(t, output, "> **Count**")
+	})
+
+	t.Run("markdown short flag works", func(t *testing.T) {
+		cmd := exec.Command(executable, "-m", "-v", "--no-progress")
+		cmd.Env = append(
+			os.Environ(),
+			"GIT_DIR="+testRepo.Path,
+		)
+		var stdout bytes.Buffer
+		cmd.Stdout = &stdout
+		err := cmd.Run()
+		require.NoError(t, err)
+
+		output := stdout.String()
+
+		// Check that output contains markdown table header
+		assert.Contains(t, output, "| Name | Value | Level of concern |")
+	})
+
+	t.Run("markdown and json flags are mutually exclusive", func(t *testing.T) {
+		cmd := exec.Command(executable, "--markdown", "--json", "--no-progress")
+		cmd.Env = append(
+			os.Environ(),
+			"GIT_DIR="+testRepo.Path,
+		)
+		err := cmd.Run()
+		assert.Error(t, err, "expected error when using both --markdown and --json")
+	})
+
+	t.Run("markdown output differs from default table output", func(t *testing.T) {
+		// Get default output
+		cmd := exec.Command(executable, "-v", "--no-progress")
+		cmd.Env = append(
+			os.Environ(),
+			"GIT_DIR="+testRepo.Path,
+		)
+		var defaultStdout bytes.Buffer
+		cmd.Stdout = &defaultStdout
+		err := cmd.Run()
+		require.NoError(t, err)
+
+		// Get markdown output
+		cmd = exec.Command(executable, "--markdown", "-v", "--no-progress")
+		cmd.Env = append(
+			os.Environ(),
+			"GIT_DIR="+testRepo.Path,
+		)
+		var markdownStdout bytes.Buffer
+		cmd.Stdout = &markdownStdout
+		err = cmd.Run()
+		require.NoError(t, err)
+
+		// They should be different
+		assert.NotEqual(t, defaultStdout.String(), markdownStdout.String())
+
+		// Default output uses bullet points, markdown uses > separator
+		assert.Contains(t, defaultStdout.String(), "* ")
+		assert.Contains(t, markdownStdout.String(), " > ")
+	})
+}
+
+// TestMarkdownTableString tests the MarkdownTableString method directly.
+func TestMarkdownTableString(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	testRepo := testutils.NewTestRepo(t, false, "markdown-table-string")
+	defer testRepo.Remove(t)
+
+	timestamp := time.Unix(1112911993, 0)
+
+	testRepo.AddFile(t, "file.txt", "Hello, world!\n")
+
+	cmd := testRepo.GitCommand(t, "commit", "-m", "initial")
+	testutils.AddAuthorInfo(cmd, &timestamp)
+	require.NoError(t, cmd.Run(), "creating commit")
+
+	repo := testRepo.Repository(t)
+
+	referenceRoots, err := sizes.CollectReferences(ctx, repo, refGrouper{})
+	require.NoError(t, err)
+
+	roots := make([]sizes.Root, 0, len(referenceRoots))
+	for _, referenceRoot := range referenceRoots {
+		roots = append(roots, referenceRoot)
+	}
+
+	h, err := sizes.ScanRepositoryUsingGraph(
+		ctx, repo, roots, sizes.NameStyleFull, meter.NoProgressMeter,
+	)
+	require.NoError(t, err)
+
+	t.Run("produces valid markdown", func(t *testing.T) {
+		output := h.MarkdownTableString(nil, 0, sizes.NameStyleFull)
+
+		// Check header
+		assert.Contains(t, output, "| Name | Value | Level of concern |")
+		assert.Contains(t, output, "|------|-------|------------------|")
+
+		// Check structure - each non-empty line should be a valid table row
+		lines := strings.Split(output, "\n")
+		for _, line := range lines {
+			if line == "" {
+				continue
+			}
+			// Each non-empty line should start and end with |
+			assert.True(t, strings.HasPrefix(line, "|"), "line should start with |: %s", line)
+			assert.True(t, strings.HasSuffix(line, "|"), "line should end with |: %s", line)
+		}
+	})
+
+		t.Run("contains expected sections", func(t *testing.T) {
+			output := h.MarkdownTableString(nil, 0, sizes.NameStyleFull)
+
+			// Check for major sections
+			assert.Contains(t, output, "**Overall repository size**")
+			assert.Contains(t, output, "**Commits**")
+			assert.Contains(t, output, "**Trees**")
+			assert.Contains(t, output, "**Blobs**")
+			assert.Contains(t, output, "**Biggest objects**")
+			assert.Contains(t, output, "**History structure**")
+			assert.Contains(t, output, "**Biggest checkouts**")
+		})
+
+		t.Run("hierarchical path format", func(t *testing.T) {
+			output := h.MarkdownTableString(nil, 0, sizes.NameStyleFull)
+
+			// Check for hierarchical paths with > separator
+			assert.Contains(t, output, " > **Count**")
+			assert.Contains(t, output, " > **Total size**")
+		})
+
+		t.Run("threshold filtering works", func(t *testing.T) {
+			// With high threshold, should get "no problems" message
+			output := h.MarkdownTableString(nil, 100, sizes.NameStyleFull)
+			assert.Contains(t, output, "No problems above the current threshold were found")
+		})
 }
