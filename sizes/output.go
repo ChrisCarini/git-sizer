@@ -20,9 +20,9 @@ func (s BlobSize) String() string {
 func (s TreeSize) String() string {
 	return fmt.Sprintf(
 		"max_path_depth=%d, max_path_length=%d, "+
-			"expanded_tree_count=%d, "+
-			"expanded_blob_count=%d, expanded_blob_size=%d, "+
-			"expanded_link_count=%d, expanded_submodule_count=%d",
+		"expanded_tree_count=%d, "+
+		"expanded_blob_count=%d, expanded_blob_size=%d, "+
+		"expanded_link_count=%d, expanded_submodule_count=%d",
 		s.MaxPathDepth, s.MaxPathLength,
 		s.ExpandedTreeCount,
 		s.ExpandedBlobCount, s.ExpandedBlobSize,
@@ -44,15 +44,15 @@ func (s TagSize) String() string {
 func (s *HistorySize) String() string {
 	return fmt.Sprintf(
 		"unique_commit_count=%d, unique_commit_count = %d, max_commit_size = %d, "+
-			"max_history_depth=%d, max_parent_count=%d, "+
-			"unique_tree_count=%d, unique_tree_entries=%d, max_tree_entries=%d, "+
-			"unique_blob_count=%d, unique_blob_size=%d, max_blob_size=%d, "+
-			"unique_tag_count=%d, "+
-			"reference_count=%d, "+
-			"max_path_depth=%d, max_path_length=%d, "+
-			"max_expanded_tree_count=%d, "+
-			"max_expanded_blob_count=%d, max_expanded_blob_size=%d, "+
-			"max_expanded_link_count=%d, max_expanded_submodule_count=%d",
+		"max_history_depth=%d, max_parent_count=%d, "+
+		"unique_tree_count=%d, unique_tree_entries=%d, max_tree_entries=%d, "+
+		"unique_blob_count=%d, unique_blob_size=%d, max_blob_size=%d, "+
+		"unique_tag_count=%d, "+
+		"reference_count=%d, "+
+		"max_path_depth=%d, max_path_length=%d, "+
+		"max_expanded_tree_count=%d, "+
+		"max_expanded_blob_count=%d, max_expanded_blob_size=%d, "+
+		"max_expanded_link_count=%d, max_expanded_submodule_count=%d",
 		s.UniqueCommitCount, s.UniqueCommitSize, s.MaxCommitSize,
 		s.MaxHistoryDepth, s.MaxParentCount,
 		s.UniqueTreeCount, s.UniqueTreeEntries, s.MaxTreeEntries,
@@ -71,17 +71,12 @@ const (
 	stars  = "******************************"
 )
 
-// Zero or more lines in the tabular output.
 type tableContents interface {
 	Emit(t *table)
 	EmitMarkdown(t *markdownTable)
 	CollectItems(items map[string]*item)
 }
 
-// A section of lines in the tabular output, consisting of a header
-// and a number of bullet lines. The lines in a section can themselves
-// be bulletized, in which case the header becomes a top-level bullet
-// and the lines become second-level bullets.
 type section struct {
 	name     string
 	contents []tableContents
@@ -116,7 +111,6 @@ func (s *section) CollectItems(items map[string]*item) {
 	}
 }
 
-// A line containing data in the tabular output.
 type item struct {
 	symbol      string
 	name        string
@@ -192,9 +186,6 @@ func (i *item) Footnote(nameStyle NameStyle) string {
 	}
 }
 
-// If this item's alert level is at least as high as the threshold,
-// return the string that should be used as its "level of concern" and
-// `true`; otherwise, return `"", false`.
 func (i *item) levelOfConcern(threshold Threshold) (string, bool) {
 	value, overflow := i.value.ToUint64()
 	if overflow {
@@ -215,7 +206,6 @@ func (i *item) CollectItems(items map[string]*item) {
 }
 
 func (i *item) MarshalJSON() ([]byte, error) {
-	// How we want to emit an item as JSON.
 	value, _ := i.value.ToUint64()
 
 	stat := struct {
@@ -244,8 +234,6 @@ func (i *item) MarshalJSON() ([]byte, error) {
 	return json.Marshal(stat)
 }
 
-// Indented returns an `item` that is just like `i`, but indented by
-// `depth` more levels.
 func (i *item) Indented(depth int) tableContents {
 	return &indentedItem{
 		tableContents: i,
@@ -271,8 +259,6 @@ func (i *indentedItem) EmitMarkdown(t *markdownTable) {
 }
 
 type Threshold float64
-
-// Methods to implement pflag.Value:
 
 func (t *Threshold) String() string {
 	if t == nil {
@@ -304,15 +290,6 @@ func (t *Threshold) Type() string {
 	return "threshold"
 }
 
-// A `pflag.Value` that can be used as a boolean option that sets a
-// `Threshold` variable to a fixed value. For example,
-//
-//		pflag.Var(
-//			sizes.NewThresholdFlagValue(&threshold, 30),
-//			"critical", "only report critical statistics",
-//		)
-//
-// adds a `--critical` flag that sets `threshold` to 30.
 type thresholdFlagValue struct {
 	b         bool
 	threshold *Threshold
@@ -352,8 +329,6 @@ const (
 	NameStyleHash
 	NameStyleFull
 )
-
-// Methods to implement pflag.Value:
 
 func (n *NameStyle) String() string {
 	if n == nil {
@@ -399,6 +374,15 @@ type table struct {
 	buf           bytes.Buffer
 }
 
+type markdownTable struct {
+	threshold     Threshold
+	nameStyle     NameStyle
+	sectionHeader string
+	pathParts     []string
+	indent        int
+	buf           bytes.Buffer
+}
+
 func (s *HistorySize) TableString(
 	refGroups []RefGroup, threshold Threshold, nameStyle NameStyle,
 ) string {
@@ -436,13 +420,10 @@ func (t *table) subTable(sectionHeader string) *table {
 func (t *table) addSection(subTable *table) {
 	if subTable.buf.Len() > 0 {
 		if t.buf.Len() == 0 {
-			// Add the section title:
 			if subTable.sectionHeader != "" {
 				t.formatSectionHeader(subTable.sectionHeader)
 			}
 		} else if t.indent == -1 {
-			// The top-level section gets blank lines between its
-			// subsections:
 			t.emitBlankRow()
 		}
 		fmt.Fprint(&t.buf, subTable.buf.String())
@@ -477,7 +458,8 @@ func (t *table) formatRow(
 		spacer = spaces[:28-l]
 	}
 	fmt.Fprintf(
-		&t.buf, "| %s%s%s%s | %5s %-3s | %-30s |\n",
+		&t.buf, "| %s%s%s%s | %5s %-3s | %-30s |
+",
 		prefix, name, spacer, citation, valueString, unitString, levelOfConcern,
 	)
 }
@@ -581,7 +563,6 @@ func (s *HistorySize) contents(refGroups []RefGroup) tableContents {
 	metric := counts.Metric
 	binary := counts.Binary
 
-	//nolint:prealloc // The length is not known in advance.
 	var rgis []tableContents
 	for _, rg := range refGroups {
 		if rg.Symbol == "" {
@@ -698,21 +679,19 @@ func (s *HistorySize) contents(refGroups []RefGroup) tableContents {
 			I("maxCheckoutPathLength", "Maximum path length",
 				"The maximum path length in any checkout",
 				s.MaxPathLengthTree, s.MaxPathLength, binary, "B", 100),
-
 			I("maxCheckoutBlobCount", "Number of files",
 				"The maximum number of files in any checkout",
 				s.MaxExpandedBlobCountTree, s.MaxExpandedBlobCount, metric, "", 50e3),
 			I("maxCheckoutBlobSize", "Total size of files",
 				"The maximum sum of file sizes in any checkout",
 				s.MaxExpandedBlobSizeTree, s.MaxExpandedBlobSize, binary, "B", 1e9),
-
 			I("maxCheckoutLinkCount", "Number of symlinks",
 				"The maximum number of symlinks in any checkout",
 				s.MaxExpandedLinkCountTree, s.MaxExpandedLinkCount, metric, "", 25e3),
-
 			I("maxCheckoutSubmoduleCount", "Number of submodules",
 				"The maximum number of submodules in any checkout",
 				s.MaxExpandedSubmoduleCountTree, s.MaxExpandedSubmoduleCount, metric, "", 100),
+			),
 		),
 	)
 }
