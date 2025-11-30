@@ -15,7 +15,7 @@ import (
 
 	"github.com/github/git-sizer/git"
 	"github.com/github/git-sizer/internal/refopts"
-	"github.com/github/git-sizer/isatty"
+	"github.com/github/git-sizerisatty"
 	"github.com/github/git-sizer/meter"
 	"github.com/github/git-sizer/sizes"
 )
@@ -44,6 +44,7 @@ const usage = `usage: git-sizer [OPTS] [ROOT...]
       --json-version=[1|2]     choose which JSON format version to output.
                                Default: --json-version=1. Can be set via
                                gitconfig: 'sizer.jsonVersion'.
+  -m, --markdown               output results in Markdown table format
       --[no-]progress          report (don't report) progress to stderr. Can
                                be set via gitconfig: 'sizer.progress'.
       --version                only report the git-sizer version number
@@ -127,6 +128,7 @@ func mainImplementation(ctx context.Context, stdout, stderr io.Writer, args []st
 	var cpuprofile string
 	var jsonOutput bool
 	var jsonVersion int
+	var markdownOutput bool
 	var threshold sizes.Threshold = 1
 	var progress bool
 	var version bool
@@ -175,6 +177,7 @@ func mainImplementation(ctx context.Context, stdout, stderr io.Writer, args []st
 
 	flags.BoolVarP(&jsonOutput, "json", "j", false, "output results in JSON format")
 	flags.IntVar(&jsonVersion, "json-version", 1, "JSON format version to output (1 or 2)")
+	flags.BoolVarP(&markdownOutput, "markdown", "m", false, "output results in Markdown table format")
 
 	defaultProgress := false
 	if f, ok := stderr.(*os.File); ok {
@@ -242,6 +245,10 @@ func mainImplementation(ctx context.Context, stdout, stderr io.Writer, args []st
 		return fmt.Errorf("couldn't open Git repository: %w", repoErr)
 	}
 
+	if jsonOutput && markdownOutput {
+		return fmt.Errorf("cannot use both --json and --markdown options")
+	}
+
 	if jsonOutput {
 		if !flags.Changed("json-version") {
 			v, err := repo.ConfigIntDefault("sizer.jsonVersion", jsonVersion)
@@ -252,7 +259,8 @@ func mainImplementation(ctx context.Context, stdout, stderr io.Writer, args []st
 			if !(jsonVersion == 1 || jsonVersion == 2) {
 				return fmt.Errorf("JSON version (read from gitconfig) must be 1 or 2")
 			}
-		} else if !(jsonVersion == 1 || jsonVersion == 2) {
+		}
+		else if !(jsonVersion == 1 || jsonVersion == 2) {
 			return fmt.Errorf("JSON version must be 1 or 2")
 		}
 	}
@@ -346,6 +354,12 @@ func mainImplementation(ctx context.Context, stdout, stderr io.Writer, args []st
 			return fmt.Errorf("could not convert %v to json: %w", historySize, err)
 		}
 		fmt.Fprintf(stdout, "%s\n", j)
+	} else if markdownOutput {
+		if _, err := io.WriteString(
+			stdout, historySize.MarkdownTableString(rg.Groups(), threshold, nameStyle),
+		); err != nil {
+			return fmt.Errorf("writing output: %w", err)
+		}
 	} else {
 		if _, err := io.WriteString(
 			stdout, historySize.TableString(rg.Groups(), threshold, nameStyle),
